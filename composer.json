@@ -1,0 +1,16 @@
+{
+    "name": "laneparton/wp-multisite-move-content",
+    "description": "Multiste move content",
+    "authors": [
+        {
+            "name": "Lane Parton",
+            "email": "lane@laneparton.com"
+        }
+    ],
+    "autoload": {
+      "psr-4": {
+          "WPMultisiteMoveContent\\": "src/"
+        }
+    },
+    "require": {}
+}
