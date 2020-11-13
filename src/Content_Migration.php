@@ -23,13 +23,23 @@ class Content_Migration {
 
     public function __toString()
     {
-        return "Target Site ID: " . $this->target_side_id . " Source Post ID: " . $this->source_post_id . " Remove Source Post: " . $this->remove_source_post;
+        return "Target Site ID: " . $this->target_site_id . " Source Post ID: " . $this->source_post_id . " Remove Source Post: " . $this->remove_source_post;
 	}
 
-    public function initMigration( $is_wpml_related_post ) {
+    public function initMigration( $is_wpml_related_post, $original_site_id ) {
+
+        $current_site_id = get_current_blog_id();
+        write_log("Current & Original");
+        write_log($current_site_id);
+        write_log($original_site_id);
+        if( $original_site_id != $current_site_id ) {
+            write_log("Originl site id != current side id, switching");
+            switch_to_blog( $original_site_id );
+        }
+
         $post = get_post( $this->source_post_id, ARRAY_A );
 
-        $source_content = new Migrated_Content( $post, $this->target_site_id );
+        $source_content = new Migrated_Content( $post, $original_site_id, $this->target_site_id );
 
         // if (\function_exists('acf')) {
         //     write_log("ACF Activated");
@@ -55,7 +65,7 @@ class Content_Migration {
 
         $inserted_post = get_post( $inserted_post_id, ARRAY_A );
     
-        $migrated_content = new Migrated_Content( $inserted_post, $this->target_site_id );
+        $migrated_content = new Migrated_Content( $inserted_post, $original_site_id, $this->target_site_id );
 
         $migrated_content->setTaxonomyData( $source_content->taxonomy_data );
         $migrated_content->setMetaData( $source_content->meta_data );
@@ -74,7 +84,7 @@ class Content_Migration {
     
         restore_current_blog();
     
-        if ( ! $this->remove_source_post ) {
+        if ( $this->remove_source_post ) {
             wp_delete_post( $this->source_post_id );
         }
     }

@@ -50,10 +50,11 @@ class Bulk_Actions {
         // our actions begin with "move_to_", so let's check if it is a target action
        if( strpos( $doaction, "move_to_" ) === 0 ) {
            $target_site_id = str_replace( "move_to_", "", $doaction );
+           $original_site_id = get_current_blog_id();
     
            foreach ( $object_ids as $post_id ) {
-                $move_content = new Content_Migration( $target_site_id, $post_id, false );
-                $move_content->initMigration( false );
+                $move_content = new Content_Migration( $target_site_id, $post_id, true );
+                $move_content->initMigration( false, $original_site_id );
            }
     
     
@@ -66,8 +67,8 @@ class Bulk_Actions {
            $target_site_id = str_replace( "duplicate_to_", "", $doaction );
     
            foreach ( $object_ids as $post_id ) {
-                $move_content = new Content_Migration( $target_site_id, $post_id, true);
-                $move_content->initMigration( false );
+                $move_content = new Content_Migration( $target_site_id, $post_id, false );
+                $move_content->initMigration( false, $original_site_id );
            }
     
     
