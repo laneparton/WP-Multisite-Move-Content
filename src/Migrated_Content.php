@@ -16,15 +16,11 @@ class Migrated_Content {
 
 	public $media_data;
 	
-	public $related_translated_posts;
-
 	public $related_acf_posts;
 	
-	private $original_site_id;
-
 	private $target_site_id;
 
-    public function __construct( $post_obj, $original_site_id, $target_site_id ) {
+    public function __construct( $post_obj, $target_site_id ) {
 		$this->post_obj		   = $post_obj;
 		$this->post_id		   = $post_obj['ID'];
 		$this->post_type	   = $post_obj['post_type'];
@@ -71,95 +67,11 @@ class Migrated_Content {
 		// write_log("/getTaxonomyData");
 	}
 
-	public function getTranslatedPosts() {
-		$languages = apply_filters( 'wpml_active_languages', NULL );
-
-		// write_log("getTranslatedPosts/languages");
-		// write_log($languages);
-		// write_log("/getTranslatedPosts/languages");
- 
-		if ( !empty( $languages ) ) {
-			foreach( $languages as $language ) {
-				// write_log("getTranslatedPosts/Language");
-				// write_log($language);
-				// write_log("/getTranslatedPosts/Language");
-				$language_code = $language['code'];
-
-				$related_post_id = apply_filters( 'wpml_object_id', $this->post_id, $this->post_type, false, $language_code );
-
-				if ( $related_post_id ) {
-					$this->related_translated_posts[$language_code] = $related_post_id;
-				}
-			}
-
-			write_log("getTranslatedPosts/Related");
-			write_log($this->related_translated_posts);
-			write_log("/getTranslatedPosts/Related");
+	public function wpmlDuplicatePosts() {
+		$post_id = $this->post_id;
+		if ( $post_id ) {
+			do_action( 'wpml_make_post_duplicates', $post_id );
 		}
-	}
-
-	public function setupTranslatedPosts( $related_translations ) {
-
-		write_log("setupTranslatedPosts/related_translations");
-		write_log($related_translations);
-		write_log("/setupTranslatedPosts/related_translations");
-
-		//  Loop Through Related Translations
-			// Migrate That Translated Post
-			// initMigration - $original_site_id, $related_translation_id, $remove_source_post
-				// $migrated_content->setupTranslatedPosts
-				// Register New Translation List
-				// It's getting past english, $language === 'en
-				// but failing to migrate the rest of the content
-
-		$new_related_translations = array();
-
-		if ( count( $related_translations ) > 1 ) {		
-			foreach ( $related_translations as $language => $related_translation_id ) {
-				if ($language === 'en') {
-					$new_related_translations[$language] = $this->post_id;
-					continue;
-				}
-				write_log($related_translation_id);
-				write_log($this->target_site_id);
-				$new_related_translation_object = new Content_Migration( $this->target_site_id, $related_translation_id, true );
-				$new_related_translation_object->initMigration( true, $this->original_site_id );
-
-				$new_related_translations[$language] = $new_related_translation_object->getNewPostId();
-			}
-		}
-
-		write_log("setupTranslatedPosts/new_related_translations");
-		write_log($new_related_translations);
-		write_log("/setupTranslatedPosts/new_related_translations");
-
-		foreach( $new_related_translations as $language => $new_translation_id ) {
-			// https://wpml.org/wpml-hook/wpml_element_type/
-			$wpml_element_type = apply_filters( 'wpml_element_type', $this->post_type );
-			
-			// get the language info of the original post
-			// https://wpml.org/wpml-hook/wpml_element_language_details/
-			$get_language_args = array(
-				'element_id' => $new_related_translations['en'],
-				'element_type' => $this->post_type
-			);
-
-			write_log($get_language_args);
-			$original_post_language_info = apply_filters( 'wpml_element_language_details', null, $get_language_args );
-			
-			write_log($original_post_language_info);
-			$set_language_args = array(
-				'element_id'    => $new_translation_id,
-				'element_type'  => $wpml_element_type,
-				'trid'   => $original_post_language_info->trid,
-				'language_code'   => $language,
-				'source_language_code' => $original_post_language_info->language_code
-			);
-			write_log($set_language_args);
-
-			do_action( 'wpml_set_element_language_details', $set_language_args );
-		}
-
 	}
 
 	public function setTaxonomyData( $new_taxonomy_data ) {
