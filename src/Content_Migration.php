@@ -31,11 +31,6 @@ class Content_Migration {
 
         $source_content = new Migrated_Content( $post, $this->target_site_id );
 
-        // if (\function_exists('acf')) {
-        //     write_log("ACF Activated");
-        //     $source_content->getAcfFields();
-        // }
-
         // Get the Taxonomy Data of Origin
         $source_content->getTaxonomyData();
         $source_content->getMetaData();
@@ -57,6 +52,7 @@ class Content_Migration {
             if ( function_exists('icl_object_id') ) {
                 write_log("WPML - Duplicating Posts");
                 $migrated_content->wpmlDuplicatePosts();
+                $migrated_content->wpmlOverwriteDuplicates( $source_content->translated_posts );
             }
         }
     

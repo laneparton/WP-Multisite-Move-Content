@@ -16,7 +16,7 @@ class Migrated_Content {
 
 	public $media_data;
 	
-	public $related_acf_posts;
+	public $translated_posts;
 	
 	private $target_site_id;
 
@@ -71,7 +71,13 @@ class Migrated_Content {
 		$post_id = $this->post_id;
 		if ( $post_id ) {
 			do_action( 'wpml_make_post_duplicates', $post_id );
+			$this->translated_posts = apply_filters( 'wpml_post_duplicates', $post_id );
 		}
+	}
+
+	public function wpmlOverwriteDuplicates ( array $translated_posts ) {
+		// Get the Old Post IDs && their data
+		// Overwrite $this translated post ID data with the 
 	}
 
 	public function setTaxonomyData( $new_taxonomy_data ) {
